@@ -31,4 +31,15 @@ public class ErrorResponse extends BaseResponse {
 			errorCode.getHttpStatus()
 		);
 	}
+
+	// Validation 실패 등 상세 메시지를 별도로 내려줄 때 사용
+	public static ErrorResponse of(ErrorCode errorCode, HttpServletRequest request, String detailMessage) {
+		return new ErrorResponse(
+			errorCode.getCode(),
+			detailMessage,
+			request.getMethod(),
+			request.getRequestURI(),
+			errorCode.getHttpStatus()
+		);
+	}
 }
