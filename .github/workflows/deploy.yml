@@ -40,5 +40,5 @@ jobs:
           script: |
             cd ~/cotato
             docker compose pull app
-            docker compose up -d --no-deps app
+            docker compose up -d
             docker image prune -f
