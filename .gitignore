@@ -39,4 +39,3 @@ out/
 ### Environment ###
 .env
 *.pem
-/docs/
