@@ -27,9 +27,17 @@ jobs:
           context: .
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/cotato-backend:latest
-          # GitHub Actions Cache로 Docker 레이어 캐싱 — 반복 빌드 속도 향상
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Copy docker-compose.yml to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          source: "docker-compose.yml"
+          target: "~/cotato"
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
@@ -39,6 +47,11 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           script: |
             cd ~/cotato
+            echo "${{ secrets.ENV_FILE }}" > .env
+            docker compose up -d db
+            until docker inspect cotato-db --format='{{.State.Health.Status}}' | grep -q "healthy"; do
+              sleep 5
+            done
             docker compose pull app
-            docker compose up -d
+            docker compose up -d --force-recreate --no-deps app
             docker image prune -f
